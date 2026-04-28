@@ -1,0 +1,41 @@
+name: Update AMFI NAV
+
+on:
+  schedule:
+    # 22:30 IST = 17:00 UTC, daily
+    - cron: "0 17 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-nav
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Fetch + parse AMFI NAVAll.txt
+        run: python scripts/fetch_nav.py
+
+      - name: Commit refreshed nav.json
+        run: |
+          if [[ -n "$(git status --porcelain data/nav.json)" ]]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add data/nav.json
+            git commit -m "chore(data): refresh AMFI NAV $(date -u +'%Y-%m-%d %H:%MZ')"
+            git push
+          else
+            echo "No changes to commit."
+          fi

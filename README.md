@@ -29,7 +29,7 @@ amfi-portfolio-tracker/
     └── update-nav.yml        ← cron job
 ```
 
-## Setup
+## Setup (GitHub Pages)
 
 1. Create a new repo on GitHub and push this folder to it.
 2. **Settings → Pages →** *Build and deployment* → Source: **Deploy from a branch**, Branch: `main` / `(root)`.
@@ -37,10 +37,26 @@ amfi-portfolio-tracker/
 4. Open the **Actions** tab → *Update AMFI NAV* → **Run workflow** once manually to generate the first `data/nav.json`. After that it runs daily at 22:30 IST.
 5. Open `https://<your-username>.github.io/<repo-name>/`.
 
-You can also run the fetch script locally:
+## Deploy on Railway
+
+This repo ships with a tiny zero-dependency Node static server (`server.js`) and
+a `railway.json`, so it deploys to [Railway](https://railway.app) out of the
+box.
+
+1. Create a new Railway project → **Deploy from GitHub repo** and pick this repo.
+2. Railway auto-detects Node via `package.json` and runs `npm start`
+   (`node server.js`), binding to `$PORT`.
+3. Click **Generate Domain** under the service's **Settings → Networking** tab to
+   get a public URL.
+4. The `data/nav.json` file is committed by the GitHub Action on a daily cron, so
+   redeploys pick up fresh NAV data automatically. You can also trigger
+   *Update AMFI NAV* manually from the **Actions** tab.
+
+Local run:
 
 ```bash
-python scripts/fetch_nav.py
+npm start            # serves the site at http://localhost:3000
+python scripts/fetch_nav.py   # refresh data/nav.json locally
 ```
 
 ## Usage notes
